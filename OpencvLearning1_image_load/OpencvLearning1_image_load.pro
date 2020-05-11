@@ -34,13 +34,24 @@ HEADERS += \
 FORMS += \
         mainwindow.ui
 
-INCLUDEPATH+=\
-            C:/opencv/opencv3_2/build/include\
-            C:/opencv/opencv3_2/build/include/opencv\
-            C:/opencv/opencv3_2/build/include/opencv2\
+#INCLUDEPATH+=\
+#            C:/opencv/opencv3_2/build/include\
+#            C:/opencv/opencv3_2/build/include/opencv\
+#            C:/opencv/opencv3_2/build/include/opencv2\
 
-LIBS+= C:/opencv/opencv3_2/build/x64/vc14/lib/opencv_world320d.lib\
-       C:/opencv/opencv3_2/build/x64/vc14/lib/opencv_world320.lib\
+#LIBS+= C:/opencv/opencv3_2/build/x64/vc14/lib/opencv_world320d.lib\
+#       C:/opencv/opencv3_2/build/x64/vc14/lib/opencv_world320.lib\
+
+INCLUDEPATH += /opt/hmi_depends/opencv3.4.1/include \
+               /opt/hmi_depends/opencv3.4.1/include/opencv \
+               /opt/hmi_depends/opencv3.4.1/include/opencv2
+
+LIBS += /opt/hmi_depends/opencv3.4.1/libs/libopencv_highgui.so \
+        /opt/hmi_depends/opencv3.4.1/libs/libopencv_core.so    \
+        /opt/hmi_depends/opencv3.4.1/libs/libopencv_imgproc.so \
+        /opt/hmi_depends/opencv3.4.1/libs/libopencv_imgcodecs.so
+
+
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
