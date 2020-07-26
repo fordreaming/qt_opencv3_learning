@@ -28,7 +28,8 @@ SOURCES += \
         mainwindow.cpp
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
+    otsuthresholdtest.hpp
 
 FORMS += \
         mainwindow.ui
@@ -44,3 +45,5 @@ LIBS += -LD:/ProgramFiles/opencv/opencv2.4.9/opencv/build/x64/vc12/lib\
         -lopencv_core249d                           \
         -lopencv_highgui249d                        \
         -lopencv_imgproc249d                        \
+
+DESTDIR += ../../qt_opencv3_learning_build/OpencvWidgetTest

@@ -1,26 +1,10 @@
-#include "mainwindow.h"
-#include <QApplication>
-#include <iostream>
+#include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
+#include <iostream>
 
 using namespace cv;
 using namespace std;
-
-//int main(int argc, char *argv[])
-//{
-//    QApplication a(argc, argv);
-//    MainWindow w;
-//    w.show();
-//    cv::Mat image = cv::imread("rice.png", 1);
-//    // create image window named "My Image"
-//    cv::namedWindow("My Image");
-//    // show the image on window
-//    cv::imshow("My Image", image);
-
-//    return a.exec();
-//}
 
 //***************Otsu算法通过求类间方差极大值求自适应阈值******************
 int OtsuAlgThreshold(const Mat image);
@@ -92,25 +76,3 @@ int OtsuAlgThreshold(const Mat image)
     }
     return T;
 }
-
-int main(int argc,char *argv[])
-{
-//    Mat image=imread(argv[1]);
-    Mat image = imread("matTotal.jpg");
-    imshow("SoureImage",image);
-    cvtColor(image,image,CV_RGB2GRAY);
-    Mat imageOutput;
-    Mat imageOtsu;
-    int thresholdValue=OtsuAlgThreshold(image);
-    cout<<"类间方差为： "<< thresholdValue << endl;
-    threshold(image, imageOutput, thresholdValue, 255, CV_THRESH_BINARY);
-    imwrite("binary1.jpg", imageOutput);
-    threshold(image, imageOtsu, 0, 255, CV_THRESH_OTSU); //Opencv Otsu算法
-    imwrite("binary2.jpg", imageOtsu);
-    //imshow("SoureImage",image);
-    imshow("Output Image", imageOutput);
-    imshow("Opencv Otsu", imageOtsu);
-    waitKey();
-    return 0;
-}
-
