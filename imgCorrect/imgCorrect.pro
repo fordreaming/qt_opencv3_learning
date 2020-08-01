@@ -34,3 +34,12 @@ FORMS += \
         mainwindow.ui
 
 DESTDIR += ../../qt_opencv3_learningBuild/ImgCorrrect
+
+INCLUDEPATH += /opt/hmi_depends/opencv3.4.1/include \
+               /opt/hmi_depends/opencv3.4.1/include/opencv \
+               /opt/hmi_depends/opencv3.4.1/include/opencv2
+
+LIBS += /opt/hmi_depends/opencv3.4.1/libs/libopencv_highgui.so \
+        /opt/hmi_depends/opencv3.4.1/libs/libopencv_core.so    \
+        /opt/hmi_depends/opencv3.4.1/libs/libopencv_imgproc.so \
+        /opt/hmi_depends/opencv3.4.1/libs/libopencv_imgcodecs.so
