@@ -1,12 +1,15 @@
 #include "mainwindow.h"
 #include <QApplication>
 #include <iostream>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
 
-using namespace cv;
+#include <opencv2/opencv.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+
+
 using namespace std;
+using namespace cv;
+
 
 //int main(int argc, char *argv[])
 //{
@@ -96,21 +99,20 @@ int OtsuAlgThreshold(const Mat image)
 int main(int argc,char *argv[])
 {
 //    Mat image=imread(argv[1]);
-    Mat image = imread("matTotal.jpg");
-    imshow("SoureImage",image);
-    cvtColor(image,image,CV_RGB2GRAY);
-    Mat imageOutput;
-    Mat imageOtsu;
-    int thresholdValue=OtsuAlgThreshold(image);
-    cout<<"类间方差为： "<< thresholdValue << endl;
-    threshold(image, imageOutput, thresholdValue, 255, CV_THRESH_BINARY);
-    imwrite("binary1.jpg", imageOutput);
-    threshold(image, imageOtsu, 0, 255, CV_THRESH_OTSU); //Opencv Otsu算法
-    imwrite("binary2.jpg", imageOtsu);
-    //imshow("SoureImage",image);
-    imshow("Output Image", imageOutput);
-    imshow("Opencv Otsu", imageOtsu);
-    waitKey();
+    Mat image = imread("/home/adt/qt/gitFordreaming/qt_opencv3_learning_build/OpencvWidgetTest/rice.png", 0);
+    imshow("test", image);
+//    cvtColor(image,image,CV_RGB2GRAY);
+//    Mat imageOutput;
+//    Mat imageOtsu;
+//    int thresholdValue=OtsuAlgThreshold(image);
+//    cout<<"类间方差为： "<< thresholdValue << endl;
+//    threshold(image, imageOutput, thresholdValue, 255, CV_THRESH_BINARY);
+//    imwrite("binary1.jpg", imageOutput);
+//    threshold(image, imageOtsu, 0, 255, CV_THRESH_OTSU); //Opencv Otsu算法
+//    imwrite("binary2.jpg", imageOtsu);
+//    //imshow("SoureImage",image);
+//    imshow("Output Image", imageOutput);
+//    imshow("Opencv Otsu", imageOtsu);
     return 0;
 }
 
