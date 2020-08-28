@@ -15,3 +15,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += main.cpp
+
+INCLUDEPATH += D:/ProgramFiles/opencv/opencv2.4.9/opencv/build/include\
+               D:/ProgramFiles/opencv/opencv2.4.9/opencv/build/include/opencv\
+               D:/ProgramFiles/opencv/opencv2.4.9/opencv/build/include/opencv2\
+
+
+
+LIBS += -LD:/ProgramFiles/opencv/opencv2.4.9/opencv/build/x64/vc12/lib\
+        -lopencv_core249d                           \
+        -lopencv_highgui249d                        \
+        -lopencv_imgproc249d
