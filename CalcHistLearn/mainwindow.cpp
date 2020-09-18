@@ -5,6 +5,8 @@
 #include <QStringList>
 #include <QString>
 
+#include <QDebug>
+
 #define INPUT_TITLE "input image"
 #define OUTPUT_TITLE "histgram "
 
@@ -58,40 +60,87 @@ void MainWindow::on_pushButton_2_clicked()
 
     imshow(INPUT_TITLE, src);
 
-    //分通道显示
-    vector<Mat> bgr_planes;
-    split(src, bgr_planes);
+    cvtColor(src, src, CV_BGR2GRAY);
 
-    //设定像素取值范围
-    int histSize = 256;
-    float range[] = { 0,256 };
-    const float *histRanges = { range };
+    const int channels[1] = {0};
+    const int histSize[1] = {256};
+    float hranges[2] = {0, 256};
+    const float* ranges[1] = { hranges };
 
-    //三个通道分别计算直方图
-    Mat b_hist, g_hist, r_hist;
-    calcHist(&bgr_planes[0], 1, 0, Mat(), b_hist, 1, &histSize, &histRanges, true, false);
-    calcHist(&bgr_planes[1], 1, 0, Mat(), g_hist, 1, &histSize, &histRanges, true, false);
-    calcHist(&bgr_planes[2], 1, 0, Mat(), r_hist, 1, &histSize, &histRanges, true, false);
+    MatND hist;
+    calcHist(&src, 1, channels, Mat(), hist, 1, histSize, ranges);
 
-    //创建直方图画布并归一化处理
-    int hist_h = 400;
-    int hist_w = 512;
-    int bin_w = hist_w / histSize;
-    Mat histImage(hist_w, hist_h, CV_8UC3, Scalar(0, 0, 0));
-    normalize(b_hist, b_hist, 0, hist_h, NORM_MINMAX, -1, Mat());
-    normalize(g_hist, g_hist, 0, hist_h, NORM_MINMAX, -1, Mat());
-    normalize(r_hist, r_hist, 0, hist_h, NORM_MINMAX, -1, Mat());
-
-    //render histogram chart  在直方图画布上画出直方图
-    for (int i = 0; i < histSize; i++)
-    {
-        line(histImage, Point((i - 1)*bin_w, hist_h - cvRound(b_hist.at<float>(i - 1))),
-             Point((i)*bin_w, hist_h - cvRound(b_hist.at<float>(i))), Scalar(255, 0, 0), 2, LINE_AA);
-        line(histImage, Point((i - 1)*bin_w, hist_h - cvRound(g_hist.at<float>(i - 1))),
-             Point((i)*bin_w, hist_h - cvRound(g_hist.at<float>(i))), Scalar(0, 255, 0), 2, LINE_AA);
-        line(histImage, Point((i - 1)*bin_w, hist_h - cvRound(r_hist.at<float>(i - 1))),
-             Point((i)*bin_w, hist_h - cvRound(r_hist.at<float>(i))), Scalar(0, 0, 255), 2, LINE_AA);
+    float sum = 0.f;
+    for(int i = 0; i < hist.rows; i++) {
+        for(int j = 0; j < hist.cols; j++) {
+            sum += hist.at<float>(i, j);
+        }
     }
-    imshow(OUTPUT_TITLE, histImage);
-    waitKey(0);
+
+    if( abs(sum - src.rows * src.cols) < 1E-6) {
+        qDebug() << "calc histgram right" << endl;
+    } else {
+        qDebug() << "calc histgram error" << endl;
+    }
+
+    qDebug() << src.rows * src.cols << endl;
+    qDebug() << "sum :" << sum << endl;
+}
+
+void MainWindow::on_pushButton_3_clicked()
+{
+    cv::Mat src = imread("timg.jpeg", IMREAD_ANYCOLOR | IMREAD_ANYDEPTH);
+
+    if (src.empty())
+    {
+        cout << "ERROR : could not load image.";
+        return ;
+    }
+
+    cv::Mat hsv;
+    cvtColor(src, hsv, COLOR_BGR2HSV);
+     // Quantize the hue to 30 levels
+     // and the saturation to 32 levels
+     int hbins = 30;
+     int sbins = 32;
+     int histSize[] = {hbins, sbins};
+     // hue varies from 0 to 179, see cvtColor
+     float hranges[] = { 0, 180 };
+     // saturation varies from 0 (black-gray-white) to
+     // 255 (pure spectrum color)
+     float sranges[] = { 0, 256 };
+     const float* ranges[] = { hranges, sranges };
+     MatND hist;
+     // we compute the histogram from the 0-th and 1-st channels
+     int channels[] = {0, 1};
+     calcHist( &hsv, 1, channels, Mat(), hist, 2, histSize, ranges, true, false );
+     qDebug() << "hist type" << hist.type() << endl;
+
+     ofstream fout;
+     fout.open("pixel.txt", ios::app);
+     for(int i = 0; i < hist.rows; i++) {
+         for(int j = 0; j < hist.cols; j++) {
+             fout << hist.at<float>(i, j) << " ";
+         }
+         fout << endl;
+     }
+
+     double maxVal = 0;
+     minMaxLoc(hist, 0, &maxVal, 0, 0);
+     int scale = 10;
+     Mat histImg = Mat::zeros(sbins*scale, hbins*10, CV_8UC3);
+     for( int h = 0; h < hbins; h++ )
+         for( int s = 0; s < sbins; s++ )
+         {
+             float binVal = hist.at<float>(h, s);
+             int intensity = cvRound(binVal*255/maxVal);
+             rectangle( histImg, Point(h*scale, s*scale), Point( (h+1)*scale - 1, (s+1)*scale - 1),
+                        Scalar::all(intensity),
+                        CV_FILLED );
+         }
+     namedWindow( "Source", 1 );
+     imshow( "Source", src );
+     namedWindow( "H-S Histogram", 1 );
+     imshow( "H-S Histogram", histImg );
+     waitKey();
 }
