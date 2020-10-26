@@ -147,3 +147,8 @@ void MainWindow::on_pushButton_3_clicked()
 //     imshow( "H-S Histogram", histImg );
      waitKey();
 }
+
+void MainWindow::on_btnHistNormalize_clicked()
+{
+
+}
