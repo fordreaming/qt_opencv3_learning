@@ -5,6 +5,8 @@
 #include"findoutercontours.h"
 #include"pointsmatch.h"
 #include"matchtemplate.h"
+#include "gomp/omp.h"
+
 using namespace cv;
 using namespace std;
 
@@ -21,6 +23,14 @@ string path = "/mnt/hgfs/VMsharedfiles/kmeansClasses/0/";
 //string path_cutting="/mnt/hgfs/VMsharedfiles/kmeansClasses/0cutting/";
 //string path_35588="/mnt/hgfs/VMsharedfiles/kmeansClasses4/0/";
 //string destpath_3588="/mnt/hgfs/VMsharedfiles/kmeansClasses4/0adaptiveImg/";
+
+
+int GetArea(const cv::Mat& img)
+{
+    cv::Mat srcImage_gray = img.clone();
+    cv::threshold(srcImage_gray, srcImage_gray, 0, 255, cv::THRESH_OTSU|cv::THRESH_BINARY_INV);
+    return cv::countNonZero(srcImage_gray);
+}
 
 
 void imgStandardmatchImgNew(cv::Mat imgStandard, cv::Mat imgNew,std::vector<float> xStandard,std::vector<float> yStandard,std::vector<float>&xOutput,std::vector<float>&yOutput)
@@ -198,7 +208,7 @@ void findNoneZero(cv::Mat binaryImage,std::vector<Point> location,std::vector<fl
      *  @brief    根据最优模板，在原图像中截取图像
      *  @return
      ***********************************************************************/
-void CaptureTemplateImg(){
+void CaptureTemplateImg(int x0, int y0, int a, int b){
     double start = cv::getTickCount();
     //函数功能：根据最优的矩形模板长a和宽b进行模板匹配
     MatchTemplate matchtemplt;
@@ -210,7 +220,7 @@ void CaptureTemplateImg(){
     //已选定的矩形模板图像
     //    cv::Rect rect=cv::Rect(990,607,1203-990,737-607);
     //    cv::Rect rect=cv::Rect(1230,751,141,213);
-    cv::Rect rect=cv::Rect(954,752,147,219);
+    cv::Rect rect=cv::Rect(x0, y0, a - x0, b - y0);
     cv::Mat src_modelImg;
     src_modelImg=cv::imread("/mnt/hgfs/VMsharedfiles/kmeansClasses/1-11/0RotationImg/43079-1-1-11.jpg",0);
     cv::Mat modelImg;
@@ -239,7 +249,7 @@ void GetOptimalTemplate()
     resultMatchImgpath = "classify5/0/matchedImg/";
 
     //已选定的矩形模板图像
-    cv::Mat img_temp = imread("classify5/cutedImg/L1.png", 0);
+    cv::Mat img_temp = imread("classify5/0/cutedImg/L1.png", 0);
     //随机生成模板图像像素位置起始点(左上角坐标)
     //根据人为给定范围(a1<a<a2,b1<b<b2范围)截取模板大小
     cv::Mat src_temp = cv::imread("classify5/0/srcImg/3785-4-11.jpg", 0);
@@ -250,32 +260,35 @@ void GetOptimalTemplate()
     //    int min_y=741,max_y=773;
     //    int min_x=1200,max_x=1233;
     //    int min_y=1248,max_y=1280;
-    int min_x=381, max_x=1191;
-    int min_y=404, max_y=1238;
+
+    int min_x = 909, max_x = 999;
+    int min_y = 567, max_y = 648;
+
     float start = cv::getTickCount();
+
     std::vector<float> sValue;
     std::vector<float>::iterator minValue;
-    for(int x0=min_x; x0 <= max_x; x0++)
+    #pragma omp parallel for num_threads(4)
+    for(int x0 = min_x; x0 <= max_x; x0++)
     {
         for(int y0 = min_y; y0 <= max_y; y0++)
         {
-            int a = img_temp.cols + x0;
-            int b = img_temp.rows + y0;
-            //            int aa=188,bb=133;
-            //            int aa=188,bb=140;
-            //            int aa=180,bb=185;
+            int a  = img_temp.cols + x0;
+            int b  = img_temp.rows + y0;
+
             int aa = img_temp.cols;
             int bb = img_temp.rows;
-            cv::Rect rect=cv::Rect(x0,y0,aa,bb);
+
+            cv::Rect rect = cv::Rect(x0, y0, aa, bb);
 
             cv::Mat src_model;
-            if(rect.x+rect.width > src_temp.cols || rect.y+rect.height>src_temp.rows)
+            if(rect.x+rect.width > src_temp.cols || rect.y+rect.height > src_temp.rows)
             {
-                std::cout<<"截取的ROI尺寸不在图像内"<<std::endl;
+                std::cout << "截取的ROI尺寸不在图像内" << std::endl;
                 continue;
             }
             else{
-                src_model=src_temp(rect);
+                src_model = src_temp(rect);
             }
 
             //留下月牙，没有月牙的模板不匹配
@@ -284,68 +297,54 @@ void GetOptimalTemplate()
             if(src_model.channels() > 1)
                 cv::cvtColor(src_model,src_gray,cv::COLOR_BGR2GRAY);
             else
-                src_gray=src_model.clone();
+                src_gray = src_model.clone();
             cv::threshold(src_gray, src_gray, 0, 255, cv::THRESH_OTSU|cv::THRESH_BINARY_INV);
             //计算面积(非零像素)
             int areaTh = cv::countNonZero(src_gray);
             cv::Mat src_modelImg;
-            //             std::cout<<"area:"<<areaTh<<std::endl;
-            //            if(areaTh>=10300&areaTh<=10310)
-            //            if(areaTh>=13300&areaTh<=13340)
+            int area = GetArea(img_temp);
 
-            //            if(areaTh>=9900&areaTh<=9915)
-            //            if(areaTh>=13200&areaTh<=13350)
-            if(areaTh <= 15100 && areaTh >= 15090)
+            if(areaTh <= (area + 20) && areaTh >= (area - 20))
             {
-                cv::imwrite("/mnt/hgfs/VMsharedfiles/kmeansClasses/*.jpg",src_gray);
+                cout << "template area:" << area << endl;
                 std::cout << "a:" << a << std::endl;
                 std::cout << "b:" << b << std::endl;
-                std::cout<<"模板起始坐标:("<<x0<<","<<y0<<")"<<std::endl;
-                std::cout<<"area:"<<areaTh<<std::endl;
-                src_modelImg=src_model.clone();
-                //    cv::Rect rect=cv::Rect(1003+5,612+5,a,b);
-                //    std::cout<<"width a:"<<a<<std::endl;
-                //    std::cout<<"height b:"<<b<<std::endl;
-                //    cv::Mat src_modelImg=src_temp(rect);
-                //    cv::imshow("model image",src_modelImg);
-                //    cv::imwrite("/mnt/hgfs/VMsharedfiles/kmeansClasses4/0model/model18.jpg",src_modelImg);
-
-                //    matchtemplt.multimatch(img,img_temp);
+                std::cout << "模板起始坐标:(" << x0 << "," << y0 << ")"<<std::endl;
+                std::cout << "area:" << areaTh << std::endl;
+                src_modelImg = src_model.clone();
                 cv::Mat img_matchResult;
-                //    matchtemplt.multimatch(img,img_temp,img_matchResult);
                 //批量模板匹配,匹配成功保存的路径resultMatchImgpath
-                matchtemplt.matchTemplateBatch(srcImgpath,src_modelImg,resultMatchImgpath,img_matchResult);
+                matchtemplt.matchTemplateBatch(srcImgpath, src_modelImg, resultMatchImgpath, img_matchResult);
 
                 //批量计算
                 std::vector<cv::String> fileNames;
-                cv::glob(resultMatchImgpath,fileNames);
+                cv::glob(resultMatchImgpath, fileNames);
                 std::vector<double> nn;
                 std::vector<std::vector<double>> mm;
-                for(int i=0;i<fileNames.size();i++)
+                for(int i = 0; i < fileNames.size(); i++)
                 {
                     Mat frames;
-                    frames=cv::imread(fileNames[i],0);//读取文件夹下的每张图像
+                    frames=cv::imread(fileNames[i], 0);//读取文件夹下的每张图像
 
                     MatchTemplate matchTemp;
                     cv::Mat framesBinImg,img_tempBin;
                     //匹配的图像frames,矩形模板图像img_temp分别进行二值化
-                    matchTemp.binaryImg(frames,framesBinImg);
-                    matchTemp.binaryImg(src_modelImg,img_tempBin);
+                    matchTemp.binaryImg(frames, framesBinImg);
+                    matchTemp.binaryImg(src_modelImg, img_tempBin);
                     int n;
-                    matchTemp.twoImgsCalcNonzero(framesBinImg,img_tempBin,n);
+                    matchTemp.twoImgsCalcNonzero(framesBinImg, img_tempBin, n);
                     nn.push_back(n);
-                    //        std::cout<<"n value:"<<n<<std::endl;
                 }
                 int total;
-                total = std::accumulate(nn.begin(),nn.end(),0);
+                total = std::accumulate(nn.begin(), nn.end(), 0);
                 //计算均值
                 int mean;
-                mean=total/nn.size();
-                std::cout<<"mean:"<<mean<<std::endl;
+                mean = total/nn.size();
+                std::cout << "mean:" << mean << std::endl;
                 //计算方差
                 int stdev;
                 int accum = 0;
-                for(int i = 0; i < nn.size();i++){
+                for(int i = 0; i < nn.size(); i++) {
                     accum += ((nn[i]-mean)*(nn[i]-mean));
                 }
                 stdev=std::sqrt(accum/nn.size());
@@ -358,9 +357,6 @@ void GetOptimalTemplate()
                 std::cout<<"sqrtValue:"<<sqrtValue<<std::endl;
                 std::cout<<std::endl;
                 //                    std::cout<<"sValue:"<<sValue[i]<<std::endl;
-            }
-            else{
-                continue;
             }
         }
     }
@@ -401,8 +397,8 @@ void rotationImg(cv::Mat &imgStandard, cv::Mat &imgNew,cv::Mat &destImage)
 void test3()
 {
     //函数功能:修正图像
-    std::string imgNewPath="/mnt/hgfs/VMsharedfiles/kmeansClasses/1-13/5";
-    std::string destImgPath="/mnt/hgfs/VMsharedfiles/kmeansClasses/1-13/5RationImg/";
+    std::string imgNewPath = "/mnt/hgfs/VMsharedfiles/kmeansClasses/1-13/5";
+    std::string destImgPath = "/mnt/hgfs/VMsharedfiles/kmeansClasses/1-13/5RationImg/";
     std::string savedFileNames;
     int len=imgNewPath.length();
 

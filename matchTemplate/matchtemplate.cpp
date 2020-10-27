@@ -28,16 +28,14 @@ void MatchTemplate::matrixMinus(cv::Mat binaryImg1, cv::Mat binaryImg2,cv::Mat &
 void MatchTemplate::matchTemplateBatch(std::string srcImgpath,cv::Mat tempImg,std::string resultpath,cv::Mat matchResult )
 {
     std::string savedFileNames;
-    int len=srcImgpath.length();
-    //    std::vector<std::string> fileNames;
+    int len = srcImgpath.length();
     std::vector<cv::String> fileNames;
-    cv::glob(srcImgpath,fileNames);
+    cv::glob(srcImgpath, fileNames);
 
-    for(int i=0; i<fileNames.size();i++)
+    for(int i = 0; i < fileNames.size(); i++)
     {
         Mat frames;
         frames = imread(fileNames[i],0);
-        //        frames = frames(Rect(564,565,295,185));
         //多目标匹配
         MatchTemplate::multimatch(frames,tempImg,matchResult);
         //将匹配结果保存在指定的文件路径
@@ -71,12 +69,12 @@ void MatchTemplate::multimatch(cv::Mat img,cv::Mat img_temp,cv::Mat &img_matchRe
     for (int k = 0; k < P.size(); k++)
     {
         Point loc = P[k];
-        Rect rect=Rect(loc.x, loc.y, img_temp.cols, img_temp.rows);
+        Rect rect = Rect(loc.x, loc.y, img_temp.cols, img_temp.rows);
         //获取匹配部分的roi图像
         Mat result_image = img.clone();
         rectangle(img, Rect(loc.x, loc.y, img_temp.cols, img_temp.rows), Scalar(0, 0, 255), 2, 8);
         Mat result_imageROI = result_image(rect);
-        img_matchResult=result_imageROI.clone();
+        img_matchResult = result_imageROI.clone();
     }
 }
 
@@ -87,9 +85,10 @@ void MatchTemplate::multimatch(cv::Mat img,cv::Mat img_temp)
 
     if (!img.data || !img_temp.data)//加载图像失败
     {
-        printf("Fault to load image!\n\r");
-        //        return -1;
+        cout << "Fault to load image " << endl;
+        return ;
     }
+
     imshow(str_Input_Window_Title, img);
     imshow(str_Template_Window_Title, img_temp);
 
@@ -164,7 +163,7 @@ void MatchTemplate::matchTemplateOne(cv::Mat srcImage,cv::Mat modelImage)
     //步骤一：创建一个空画布用来绘制匹配结果
     cv::Mat dstImg;
     dstImg.create(srcImage.dims,srcImage.size,srcImage.type());
-//    cv::imshow("createImg",dstImg);
+    //    cv::imshow("createImg",dstImg);
 
     //步骤二：匹配，最后一个参数为匹配方式，共有6种，详细请查阅函数介绍
     cv::matchTemplate(srcImage, modelImage, dstImg, 0);
