@@ -35,9 +35,9 @@ void MatchTemplate::matchTemplateBatch(std::string srcImgpath,cv::Mat tempImg,st
     for(int i = 0; i < fileNames.size(); i++)
     {
         Mat frames;
-        frames = imread(fileNames[i],0);
+        frames = imread(fileNames[i], 0);
         //多目标匹配
-        MatchTemplate::multimatch(frames,tempImg,matchResult);
+        MatchTemplate::multimatch(frames, tempImg, matchResult);
         //将匹配结果保存在指定的文件路径
         savedFileNames = resultpath + fileNames[i].substr(len);
         imwrite(savedFileNames, matchResult);
@@ -56,7 +56,7 @@ void MatchTemplate::binaryImg(Mat srcImg, Mat &binaryResultImg)
     cv::threshold(srcGray, binaryResultImg, 0, 255, cv::THRESH_OTSU|cv::THRESH_BINARY);
 }
 
-void MatchTemplate::multimatch(cv::Mat img,cv::Mat img_temp,cv::Mat &img_matchResult)
+void MatchTemplate::multimatch(cv::Mat img, cv::Mat img_temp, cv::Mat &img_matchResult)
 {
     //调用函数检测
     vector<Point> P;//存储所有检测目标的坐标

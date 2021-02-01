@@ -1,6 +1,6 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2020-09-22T10:26:56
+# Project created by QtCreator 2021-01-30T10:33:29
 #
 #-------------------------------------------------
 
@@ -8,7 +8,7 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = SubtractLowPassedImage
+TARGET = OpencvTest
 TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
@@ -33,6 +33,8 @@ HEADERS += \
 FORMS += \
         mainwindow.ui
 
+INCLUDEPATH += /opt/hmi_depends/algorithm_depends/include
+
 #opencv3.4.1
 INCLUDEPATH   += /opt/hmi_depends/opencv3.4.1/include
 INCLUDEPATH   += /opt/hmi_depends/opencv3.4.1/include/opencv
@@ -41,5 +43,6 @@ INCLUDEPATH   += /opt/hmi_depends/opencv3.4.1/include/opencv2
 #libs
 LIBS += /opt/hmi_depends/opencv3.4.1/libs/libopencv*.so.3.4.1
 
+DESTDIR += ../../qt_opencv3_learning_build/OpencvTest
 
-DESTDIR += ../../qt_opencv3_learning_build/SubtractLowPassedImage
+include (MatOper/MatOper.pri)

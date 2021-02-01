@@ -6,6 +6,7 @@
 #include"pointsmatch.h"
 #include"matchtemplate.h"
 #include "gomp/omp.h"
+#include "imgproc.h"
 
 using namespace cv;
 using namespace std;
@@ -13,7 +14,7 @@ using namespace std;
 cv::Mat g_srcImage, g_tempalteImage, g_resultImage;
 int g_nMatchMethod;
 int g_nMaxTrackbarNum = 5;
-int g_templateX,g_templateY;
+int g_templateX, g_templateY;
 int g_distance;
 
 //cv::Mat ImgStandard,ImgNew,ImgNew_gray;
@@ -31,7 +32,6 @@ int GetArea(const cv::Mat& img)
     cv::threshold(srcImage_gray, srcImage_gray, 0, 255, cv::THRESH_OTSU|cv::THRESH_BINARY_INV);
     return cv::countNonZero(srcImage_gray);
 }
-
 
 void imgStandardmatchImgNew(cv::Mat imgStandard, cv::Mat imgNew,std::vector<float> xStandard,std::vector<float> yStandard,std::vector<float>&xOutput,std::vector<float>&yOutput)
 {
